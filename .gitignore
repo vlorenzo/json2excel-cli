@@ -1,0 +1,27 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# --- Virtual environments ---
+.venv/
+.env/
+venv/
+env/
+
+# --- Python packaging / build ---
+*.egg-info/
+dist/
+build/
+
+# --- Project-specific outputs ---
+out.csv
+out.xlsx
+tmp_sample.json
+
+# --- Editor / OS files ---
+.DS_Store
+*.swp
+*.swo

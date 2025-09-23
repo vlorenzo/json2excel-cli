@@ -1,7 +1,7 @@
 [project]
 name = "json-to-excel-converter"
 version = "0.1.0"
-description = "Add your description here"
+description = "Convert large JSON to CSV/XLSX with root selection, flattening, array explode, exclusion, and header control."
 authors = [
     { name = "Lorenzo", email = "v.lorenzo@gmail.com" }
 ]
@@ -24,5 +24,6 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "black>=25.9.0",
+    "pytest>=8.4.2",
     "ruff>=0.13.1",
 ]

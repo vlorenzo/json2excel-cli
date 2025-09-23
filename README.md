@@ -1,6 +1,10 @@
 # JSON to Excel Converter
 
-Convert large JSON files to flat tabular formats (CSV/XLSX) with streaming, configurable flattening, and list handling.
+Convert large JSON to CSV/XLSX with root selection, flattening, array explode, exclusion, and header control.
+
+- User Guide: [docs/guide.md](docs/guide.md)
+- Technical Notes: [docs/tech.md](docs/tech.md)
+- Examples: [examples/commands.md](examples/commands.md)
 
 ## Features
 - Streams JSON using `ijson` (no need to load entire file)
@@ -20,16 +24,16 @@ uv sync
 ```bash
 . .venv/bin/activate
 json-to-excel-converter INPUT.json OUTPUT.(csv|xlsx) \
-  --root data.items \
-  --explode orders \
+  --root items \
+  --explode attributes \
   --list-policy join \
   --list-sep "," \
   --sep . \
-  --sheet-name Sheet1 \
+  --sheet-name Items \
   --sample-headers 1000 \
   --header-order stable \
-  --first-column Vid --first-column DealerId \
-  --exclude Advertiser --exclude Eurotax.Options.Serie
+  --first-column id \
+  --exclude details
 ```
 
 ### Options
@@ -44,25 +48,25 @@ json-to-excel-converter INPUT.json OUTPUT.(csv|xlsx) \
 - `--exclude` (repeatable): drop any column whose dotted name equals or starts with the given prefix.
 
 ## Examples
-- Flat rows per ad (CSV):
+- Flat rows per item (CSV):
 ```bash
-json-to-excel-converter data.json out.csv --root Ads
+json-to-excel-converter examples/ads_small.json out.csv --root items
 ```
 
 - Explode nested arrays and keep IDs first:
 ```bash
-json-to-excel-converter data.json out.xlsx \
-  --root Ads \
-  --explode Options --explode Eurotax.Options.Serie \
-  --first-column Vid --first-column DealerId \
+json-to-excel-converter examples/ads_small.json out.xlsx \
+  --root items \
+  --explode attributes \
+  --first-column id \
   --header-order stable
 ```
 
-- Exclude advertiser and Eurotax Serie details:
+- Exclude a subtree:
 ```bash
-json-to-excel-converter data.json out.csv \
-  --root Ads \
-  --exclude Advertiser --exclude Eurotax.Options.Serie
+json-to-excel-converter examples/ads_small.json out.csv \
+  --root items \
+  --exclude details
 ```
 
 ## Library usage
@@ -73,8 +77,15 @@ from json_to_excel_converter.io_table import write_csv
 
 rows = (
     row
-    for rec in iter_items("input.json", root_path="data.items")
-    for row in flatten_record(rec, sep=",", explode_paths=["orders"]) 
+    for rec in iter_items("input.json", root_path="items")
+    for row in flatten_record(rec, sep=",", explode_paths=["attributes"]) 
 )
 write_csv(rows, "out.csv", pre_headers=["id"], header_order="stable")
+```
+
+## Tests
+```bash
+uv run pytest -q
+# Run only CLI tests
+uv run pytest -q tests/cli
 ```

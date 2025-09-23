@@ -1,0 +1,19 @@
+{
+  "source": "example",
+  "items": [
+    {
+      "id": "I1",
+      "details": {"name": "Item 1", "email": "a@example.com"},
+      "summary": {"color": "White", "label": "Item 1"},
+      "attributes": [{"key": "X", "label": "Feature X", "price": 0}],
+      "metrics": [{"co2": "120.5"}]
+    },
+    {
+      "id": "I2",
+      "details": {"name": "Item 2", "email": "b@example.com"},
+      "summary": {"color": "Black", "label": "Item 2"},
+      "attributes": [],
+      "metrics": [{"co2": "130.0"}]
+    }
+  ]
+}

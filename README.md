@@ -1,19 +1,14 @@
 # JSON to Excel Converter
 
-Convert large JSON to CSV/XLSX with root selection, flattening, array explode, exclusion, and header control.
-
-- Advanced Usage & Troubleshooting: [docs/guide.md](docs/guide.md)
-- Technical Implementation Details: [docs/tech.md](docs/tech.md)
-- Quick Command Reference: [examples/commands.md](examples/commands.md)
+Convert large JSON files to CSV/XLSX with advanced data transformation features.
 
 ## Features
-- Streams JSON using `ijson` (no need to load entire file)
-- Choose root node (dotted path or JSON Pointer)
-- Flatten nested objects with a custom separator
-- Options for list handling: join scalars, JSON-encode; explode specific paths into rows
-- Write CSV or XLSX, with header sampling
-- Control header ordering and pin selected columns to the front
-- Exclude nested properties by dotted path prefix
+- Handle large JSON files efficiently
+- Flatten nested objects into columns
+- Convert arrays into separate rows or joined values
+- Control column ordering and selection
+- Support both CSV and Excel output
+- Remove unwanted columns from output
 
 ## Installation
 
@@ -46,15 +41,14 @@ json-to-excel-converter INPUT.json OUTPUT.(csv|xlsx) \
 ```
 
 ### Options
-- `--root`: dotted or JSON Pointer path to array/object to iterate.
-- `--explode` (repeatable): dotted paths to arrays to explode into rows (cartesian product if multiple).
-- `--list-policy`: how to handle lists that are not exploded (`join` or `json`).
-- `--list-sep`: used for `join` policy of scalar lists.
-- `--allow-object-values`: iterate over object values if `--root` points to an object.
-- `--sample-headers`: how many rows to peek to build headers; increase for very heterogeneous data.
-- `--header-order`: `stable` (first-seen order; default) or `alpha` (alphabetical after pinned columns).
-- `--first-column` (repeatable): pin columns to the beginning in the given order.
-- `--exclude` (repeatable): drop any column whose dotted name equals or starts with the given prefix.
+- `--root`: path to array/object to process (optional, defaults to top-level array)
+- `--explode`: create separate rows for array elements (repeatable)
+- `--list-policy`: handle arrays as `join` (comma-separated) or `json` (JSON string)
+- `--list-sep`: separator for joined arrays (default: ";")
+- `--sample-headers`: rows to scan for column discovery (default: 1000)
+- `--header-order`: column ordering `stable` (first-seen) or `alpha` (alphabetical)
+- `--first-column`: pin specific columns to the beginning (repeatable)
+- `--exclude`: remove columns by path prefix (repeatable)
 
 ## Examples
 
@@ -103,7 +97,7 @@ json-to-excel-converter sample.json detailed.csv --root orders --explode items -
 **What you get**: 12 rows (items × tags combinations)
 - Every item gets a row for each tag of that order
 
-### 4. Data Privacy - Remove Sensitive Information
+### 4. Remove Unwanted Columns
 ```bash
 json-to-excel-converter sample.json clean.csv --root orders --exclude customer.address --first-column order_id
 ```
@@ -115,16 +109,16 @@ json-to-excel-converter sample.json orders.xlsx --root orders --sheet-name "Cust
 ```
 
 ### 6. Working with Your Own Data
-Replace `sample.json` with your JSON file and adjust the `--root` path:
+Replace `sample.json` with your JSON file:
 ```bash
-# For JSON with "products" array
+# For JSON starting with an array (no --root needed)
+json-to-excel-converter your-data.json output.csv --first-column id
+
+# For JSON with nested "products" array
 json-to-excel-converter your-data.json output.csv --root products --first-column id
 
-# For deeply nested data, exclude sensitive parts
-json-to-excel-converter your-data.json output.csv --root items --exclude personal_info --exclude internal
-
-# For multiple array explosions (be careful - this multiplies rows!)
-json-to-excel-converter your-data.json output.csv --root orders --explode line_items --explode shipping_options
+# Remove unwanted columns
+json-to-excel-converter your-data.json output.csv --exclude personal_info --exclude internal
 ```
 
 ### Row Count Summary
@@ -133,19 +127,6 @@ json-to-excel-converter your-data.json output.csv --root orders --explode line_i
 - **Explode tags**: 5 rows (different tag counts)
 - **Explode both**: 12 rows (items × tags cartesian product)
 
-## Library Usage
-```python
-from json_to_excel_converter.io_json import iter_items
-from json_to_excel_converter.flatten import flatten_record
-from json_to_excel_converter.io_table import write_csv
-
-rows = (
-    row
-    for rec in iter_items("input.json", root_path="items")
-    for row in flatten_record(rec, sep=".", explode_paths=["attributes"])
-)
-write_csv(rows, "out.csv", pre_headers=["id"], header_order="stable")
-```
 
 ## Contributing
 

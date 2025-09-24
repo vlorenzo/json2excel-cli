@@ -34,7 +34,7 @@ json-to-excel-converter INPUT.json OUTPUT.(csv|xlsx) \
   --list-sep "," \
   --sep . \
   --sheet-name Items \
-  --sample-headers 1000 \
+  --sample-headers 10 \
   --header-order stable \
   --first-column id \
   --exclude details

@@ -1,61 +1,51 @@
-## User Guide
+## Advanced Usage Guide
 
-This guide shows how to use the converter effectively with practical examples.
+### Core Concepts
 
-### Concepts
-- **Root selection (`--root`)**: Choose the array (or object) to iterate. Supports dotted paths (e.g., `items`) and JSON Pointer (e.g., `/items`).
-- **Flattening**: Nested objects are flattened to dotted columns using `--sep` (default: `.`).
-- **Lists**:
-  - Not exploded: join scalars with `--list-sep` (default `;`) when `--list-policy join` (default), or JSON-encode with `--list-policy json`.
-  - Exploded (`--explode path`): create one row per element; multiple explodes produce a cartesian product.
-- **Headers**:
-  - Sampled from the first N rows (`--sample-headers`, default 1000).
-  - Order: pin with `--first-column`, then `--header-order stable|alpha` for the rest.
-- **Exclude**: Remove columns by dotted prefix using `--exclude`.
+#### Root Path Selection
+- **Dotted paths**: `items`, `data.records`, `response.results`
+- **JSON Pointer**: `/items`, `/data/records`, `/response/results`
+- **Top-level arrays**: Omit `--root` entirely if your JSON starts with an array
 
-### Quickstart
-```bash
-. .venv/bin/activate
-json-to-excel-converter examples/ads_small.json out.csv --root items
-```
+#### Flattening Behavior
+- Nested objects become dotted column names: `customer.address.city`
+- Use `--sep` to change the separator: `--sep "_"` → `customer_address_city`
+- Arrays are handled based on policy (see below)
 
-### Recipes
+#### List Handling Policies
+- **`--list-policy join`** (default): Scalar arrays become `value1;value2;value3`
+- **`--list-policy json`**: Arrays become JSON strings `["value1","value2"]`
+- **`--explode path`**: Creates separate rows for each array element
 
-1) Flat export from a root array
-```bash
-json-to-excel-converter examples/ads_small.json out.csv --root items
-```
-
-2) Explode one nested list into rows
-```bash
-json-to-excel-converter examples/ads_small.json out.csv \
-  --root items \
-  --explode attributes
-```
-
-3) Exclude a subtree and pin IDs first
-```bash
-json-to-excel-converter examples/ads_small.json out.xlsx \
-  --root items \
-  --exclude details \
-  --first-column id --header-order stable
-```
-
-4) XLSX with a custom sheet name
-```bash
-json-to-excel-converter examples/ads_small.json out.xlsx --root items --sheet-name Items
-```
+#### Header Management
+- **Sampling**: Tool reads first `--sample-headers` rows (default: 1000) to discover all possible columns
+- **Ordering**: `--header-order stable` (first-seen) vs `--header-order alpha` (alphabetical)
+- **Pinning**: `--first-column id --first-column name` puts these columns first
 
 ### Troubleshooting
-- "No items found at the given root path":
-  - Verify the path (try `--root items` or `--root /items`).
-  - If the top-level is an array, omit `--root`.
-- Very wide or heterogeneous data:
-  - Increase `--sample-headers` to include more keys in the header set.
-- Decimal values and numbers:
-  - Numbers are preserved; very large integers may be better exported as text for Excel readability.
 
-### Performance tips
-- Keep `--list-policy join` for readability unless you need full JSON detail.
-- Use `--explode` only for the arrays you need to expand, to limit row multiplication.
-- For very large files, prefer CSV over XLSX.
+#### Common Errors
+- **"No items found at the given root path"**:
+  - Check your path: `--root items` vs `--root /items` (both should work)
+  - If your JSON starts with an array `[...]`, omit `--root` entirely
+  - Use `--allow-object-values` if your root points to an object instead of array
+
+- **Missing columns in output**:
+  - Increase `--sample-headers 5000` to scan more rows for column discovery
+  - Some columns might appear late in the data stream
+
+- **Too many rows after explosion**:
+  - Multiple `--explode` flags create cartesian products (rows multiply)
+  - Use `--explode` selectively only for arrays you need to analyze
+
+#### Performance Optimization
+- **Large files**: Prefer CSV over XLSX (faster, smaller memory footprint)
+- **Wide data**: Use `--exclude prefix` to remove unnecessary column trees
+- **Memory usage**: The tool streams JSON, but XLSX writing loads everything in memory
+- **List handling**: Keep `--list-policy join` unless you need full JSON arrays
+
+#### Data Quality Issues
+- **Mixed data types**: Tool handles this gracefully, missing fields become empty cells
+- **Large numbers**: Very large integers might display in scientific notation in Excel
+- **Special characters**: UTF-8 is preserved in both CSV and XLSX output
+- **Null values**: JSON `null` becomes empty cells, not the string "null"

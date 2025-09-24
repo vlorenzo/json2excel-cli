@@ -1,0 +1,102 @@
+{
+  "company": "Tech Store Inc",
+  "timestamp": "2025-01-01T12:00:00Z",
+  "orders": [
+    {
+      "order_id": "ORD001",
+      "customer": {
+        "name": "John Smith",
+        "email": "john@example.com",
+        "address": {
+          "street": "123 Main St",
+          "city": "New York",
+          "country": "USA"
+        }
+      },
+      "items": [
+        {
+          "product": "Laptop",
+          "brand": "Dell",
+          "price": 1299.99,
+          "quantity": 1
+        },
+        {
+          "product": "Mouse",
+          "brand": "Logitech",
+          "price": 29.99,
+          "quantity": 2
+        }
+      ],
+      "payment": {
+        "method": "credit_card",
+        "status": "completed",
+        "total": 1359.97
+      },
+      "tags": ["priority", "business"]
+    },
+    {
+      "order_id": "ORD002",
+      "customer": {
+        "name": "Jane Doe",
+        "email": "jane@example.com",
+        "address": {
+          "street": "456 Oak Ave",
+          "city": "Los Angeles",
+          "country": "USA"
+        }
+      },
+      "items": [
+        {
+          "product": "Phone",
+          "brand": "Apple",
+          "price": 799.99,
+          "quantity": 1
+        }
+      ],
+      "payment": {
+        "method": "paypal",
+        "status": "pending",
+        "total": 799.99
+      },
+      "tags": ["standard"]
+    },
+    {
+      "order_id": "ORD003",
+      "customer": {
+        "name": "Bob Wilson",
+        "email": "bob@example.com",
+        "address": {
+          "street": "789 Pine Rd",
+          "city": "Chicago",
+          "country": "USA"
+        }
+      },
+      "items": [
+        {
+          "product": "Keyboard",
+          "brand": "Microsoft",
+          "price": 89.99,
+          "quantity": 1
+        },
+        {
+          "product": "Monitor",
+          "brand": "Samsung",
+          "price": 299.99,
+          "quantity": 1
+        },
+        {
+          "product": "Cable",
+          "brand": "Amazon Basics",
+          "price": 15.99,
+          "quantity": 3
+        }
+      ],
+      "payment": {
+        "method": "credit_card",
+        "status": "completed",
+        "total": 437.96
+      },
+      "tags": ["bulk", "discount"]
+    }
+  ]
+}

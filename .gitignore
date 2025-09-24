@@ -25,3 +25,5 @@ tmp_sample.json
 .DS_Store
 *.swp
 *.swo
+CLAUDE.md
+detailed.csv

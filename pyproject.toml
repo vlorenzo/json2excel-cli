@@ -1,9 +1,25 @@
 [project]
 name = "json-to-excel-converter"
 version = "0.1.0"
-description = "Add your description here"
+description = "Convert large JSON to CSV/XLSX with root selection, flattening, array explode, exclusion, and header control."
+readme = "README.md"
+license = { text = "MIT" }
 authors = [
-    { name = "Lorenzo", email = "v.lorenzo@gmail.com" }
+    { name = "Lorenzo Verna", email = "v.lorenzo@gmail.com" }
+]
+keywords = ["json", "excel", "csv", "xlsx", "data-conversion", "cli"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial :: Spreadsheet",
+    "Topic :: Text Processing :: Markup",
+    "Topic :: Utilities",
 ]
 requires-python = ">=3.12"
 dependencies = [
@@ -13,6 +29,12 @@ dependencies = [
     "rich>=14.1.0",
     "typer>=0.19.2",
 ]
+
+[project.urls]
+Homepage = "https://github.com/vlorenzo/json2excel-cli"
+Repository = "https://github.com/vlorenzo/json2excel-cli"
+Issues = "https://github.com/vlorenzo/json2excel-cli/issues"
+Documentation = "https://github.com/vlorenzo/json2excel-cli#readme"
 
 [project.scripts]
 json-to-excel-converter = "json_to_excel_converter:main"
@@ -24,5 +46,6 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "black>=25.9.0",
+    "pytest>=8.4.2",
     "ruff>=0.13.1",
 ]

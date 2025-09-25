@@ -1,20 +1,48 @@
-# JSON to Excel Converter
+# JSON to Excel / CSV CLI
 
-Convert large JSON files to CSV/XLSX with advanced data transformation features.
+[![PyPI version](https://img.shields.io/pypi/v/json-to-excel-converter)](https://pypi.org/project/json-to-excel-converter/)
+[![Python versions](https://img.shields.io/pypi/pyversions/json-to-excel-converter)](https://pypi.org/project/json-to-excel-converter/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+A small, fast command‑line tool to convert JSON to Excel (XLSX) or CSV.
+It flattens nested objects into columns and can explode arrays into multiple rows.
+Input JSON is streamed from disk (via `ijson`) so you can process large files.
 
 ## Features
-- Handle large JSON files efficiently
-- Flatten nested objects into columns
-- Convert arrays into separate rows or joined values
-- Control column ordering and selection
-- Support both CSV and Excel output
-- Remove unwanted columns from output
+- Stream JSON input from disk (does not load entire file into memory)
+- Flatten nested objects into dotted columns (configurable separator)
+- Explode arrays into multiple rows for analysis
+- Join or JSON-encode non‑exploded lists (`--list-policy join|json`)
+- Discover and order headers with sampling; pin first columns
+- Exclude entire column trees by prefix (e.g., `--exclude customer.address`)
+- Write CSV (streaming) or Excel XLSX output (uses `openpyxl`)
+
+## Quickstart
+
+```bash
+# Install (choose one)
+pipx install json-to-excel-converter
+# or
+pip install json-to-excel-converter
+# or, if you use uv
+uv tool install json-to-excel-converter
+
+# Convert JSON to CSV
+json-to-excel-converter INPUT.json output.csv --root items --first-column id
+
+# Convert JSON to Excel (XLSX)
+json-to-excel-converter INPUT.json output.xlsx --root items --sheet-name Items
+```
 
 ## Installation
 
 ### For End Users
 ```bash
+pipx install json-to-excel-converter
+# or
 pip install json-to-excel-converter
+# or
+uv tool install json-to-excel-converter
 ```
 
 ### For Development
@@ -49,6 +77,21 @@ json-to-excel-converter INPUT.json OUTPUT.(csv|xlsx) \
 - `--header-order`: column ordering `stable` (first-seen) or `alpha` (alphabetical)
 - `--first-column`: pin specific columns to the beginning (repeatable)
 - `--exclude`: remove columns by path prefix (repeatable)
+
+## FAQ
+
+- **How do I select the part of JSON to convert?** Use `--root` with a dotted path
+  like `orders.items` or a JSON Pointer like `/orders/items`. If your JSON starts
+  with an array, you can omit `--root`.
+- **My root is an object, not an array. What happens?** By default, the tool
+  expects an array. If your root points to an object, pass `--allow-object-values`
+  to iterate that object's values.
+- **How do I explode arrays into rows?** Pass `--explode path` (repeatable) for each
+  array you want to expand. Multiple `--explode` flags create a cartesian product
+  across those arrays.
+- **How are lists handled if I don't explode them?** Choose `--list-policy join`
+  (default) to join scalar lists with `--list-sep` or `--list-policy json` to
+  JSON‑encode the list.
 
 ## Examples
 
@@ -126,6 +169,20 @@ json-to-excel-converter your-data.json output.csv --exclude personal_info --excl
 - **Explode items**: 6 rows (multiple items per order)
 - **Explode tags**: 5 rows (different tag counts)
 - **Explode both**: 12 rows (items × tags cartesian product)
+
+
+## When to prefer CSV over XLSX
+
+XLSX writing is convenient but the workbook is kept in memory by `openpyxl`,
+so for very large outputs CSV is usually faster and more memory‑efficient.
+
+Consider using CSV when any of these apply:
+
+- Your input JSON is larger than ~200 MB
+- You approach Excel’s sheet limit of 1,048,576 rows
+
+This tool streams JSON input, so it typically handles files up to around 1 GB
+without issues when writing CSV.
 
 
 ## Contributing

@@ -21,6 +21,7 @@
 - **Sampling**: Tool reads first `--sample-headers` rows (default: 1000) to discover all possible columns
 - **Ordering**: `--header-order stable` (first-seen) vs `--header-order alpha` (alphabetical)
 - **Pinning**: `--first-column id --first-column name` puts these columns first
+- **Including**: `--include prefix` keeps only matching columns. When multiple are provided, groups are ordered by flag order; within each group, `--header-order` applies.
 
 ### Troubleshooting
 

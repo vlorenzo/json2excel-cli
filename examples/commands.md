@@ -19,6 +19,13 @@ json-to-excel-converter sample.json clean.csv --root orders --exclude customer.a
 
 # Excel with custom sheet
 json-to-excel-converter sample.json orders.xlsx --root orders --sheet-name "Orders"
+
+# Include selected columns and order groups
+json-to-excel-converter sample.json selected.csv \
+  --root orders \
+  --first-column order_id \
+  --include payment \
+  --include customer
 ```
 
 ## Development Examples (using sample data)

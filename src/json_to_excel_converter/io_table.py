@@ -13,6 +13,7 @@ def _collect_headers(
     max_sample: int = 1000,
     pre_headers: Sequence[str] | None = None,
     order: str = "stable",
+    include_prefixes: Sequence[str] | None = None,
 ) -> tuple[List[str], List[Dict[str, object]], Iterator[Dict[str, object]]]:
     """
     Look ahead up to max_sample rows to build a header list and return
@@ -37,7 +38,8 @@ def _collect_headers(
         header_set: set[str] = set(pre_headers)
         for r in buffer:
             header_set.update(r.keys())
-        headers = pre_headers + sorted(h for h in header_set if h not in pre_headers)
+        discovered = sorted(h for h in header_set if h not in pre_headers)
+        headers = pre_headers + discovered
     else:
         seen: set[str] = set(pre_headers)
         headers: List[str] = list(pre_headers)
@@ -46,6 +48,35 @@ def _collect_headers(
                 if k not in seen:
                     seen.add(k)
                     headers.append(k)
+
+    # Reorder headers after pre_headers according to include_prefixes order, if provided
+    if include_prefixes:
+        pinned_count = len(pre_headers)
+        pinned = headers[:pinned_count]
+        remaining = headers[pinned_count:]
+
+        def matches_prefix(h: str, p: str) -> bool:
+            return h == p or h.startswith(p + ".")
+
+        # Stable index map for preserving discovery order within groups
+        order_index = {h: i for i, h in enumerate(remaining)}
+
+        selected: List[str] = []
+        seen_sel: set[str] = set()
+        for p in include_prefixes:
+            group = [h for h in remaining if matches_prefix(h, p) and h not in seen_sel]
+            if not group:
+                continue
+            if order == "alpha":
+                group.sort()
+            else:
+                group.sort(key=lambda x: order_index.get(x, 0))
+            selected.extend(group)
+            seen_sel.update(group)
+
+        # Any remaining not matched (should be none due to CLI filtering) keep their relative order
+        tail = [h for h in remaining if h not in seen_sel]
+        headers = pinned + selected + tail
 
     def chained() -> Iterator[Dict[str, object]]:
         for r in buffer:
@@ -83,6 +114,7 @@ def write_csv(
     pre_headers: Sequence[str] | None = None,
     encoding: str = "utf-8",
     header_order: str = "stable",
+    include_prefixes: Sequence[str] | None = None,
 ) -> None:
     import csv
 
@@ -90,7 +122,7 @@ def write_csv(
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     headers, _buf, chained = _collect_headers(
-        rows, max_sample=max_sample, pre_headers=pre_headers, order=header_order
+        rows, max_sample=max_sample, pre_headers=pre_headers, order=header_order, include_prefixes=include_prefixes
     )
 
     with out_path.open("w", newline="", encoding=encoding) as f:
@@ -111,12 +143,13 @@ def write_xlsx(
     max_sample: int = 1000,
     pre_headers: Sequence[str] | None = None,
     header_order: str = "stable",
+    include_prefixes: Sequence[str] | None = None,
 ) -> None:
     out_path = Path(output_file)
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     headers, _buf, chained = _collect_headers(
-        rows, max_sample=max_sample, pre_headers=pre_headers, order=header_order
+        rows, max_sample=max_sample, pre_headers=pre_headers, order=header_order, include_prefixes=include_prefixes
     )
 
     wb = Workbook()

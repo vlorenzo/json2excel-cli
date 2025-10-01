@@ -24,6 +24,15 @@ def _should_exclude(column: str, excludes: List[str]) -> bool:
     return False
 
 
+def _should_include(column: str, includes: List[str]) -> bool:
+    for p in includes:
+        if not p:
+            continue
+        if column == p or column.startswith(p + "."):
+            return True
+    return False
+
+
 def _pipeline(
     input_path: Path,
     root_path: Optional[str],
@@ -33,6 +42,8 @@ def _pipeline(
     list_separator: str,
     explode: List[str],
     excludes: List[str],
+    includes: List[str],
+    pinned_first_columns: List[str],
 ) -> Iterator[dict]:
     for rec in iter_items(input_path, root_path=root_path, allow_object_values=allow_object_values):
         rows = flatten_record(
@@ -43,10 +54,18 @@ def _pipeline(
             explode_paths=explode,
         )
         for row in rows:
-            if excludes:
-                filtered = {k: v for k, v in row.items() if not _should_exclude(k, excludes)}
+            # Apply include filter first (if provided), always retain pinned first columns
+            if includes:
+                filtered = {
+                    k: v
+                    for k, v in row.items()
+                    if _should_include(k, includes) or k in pinned_first_columns
+                }
             else:
                 filtered = row
+            # Then apply excludes
+            if excludes:
+                filtered = {k: v for k, v in filtered.items() if not _should_exclude(k, excludes)}
             yield filtered
 
 
@@ -60,6 +79,7 @@ def convert(
     list_policy: str = typer.Option(ListPolicy.JOIN, "--list-policy", help="How to handle lists that are not exploded", case_sensitive=False),
     list_separator: str = typer.Option(";", "--list-sep", help="Separator for JOIN list policy"),
     explode: List[str] = typer.Option([], "--explode", help="Dotted key paths to explode into multiple rows (repeatable)", show_default=False),
+    include: List[str] = typer.Option([], "--include", help="Only include columns whose dotted path equals or starts with this prefix (repeatable)", show_default=False),
     exclude: List[str] = typer.Option([], "--exclude", help="Drop columns whose dotted path equals or starts with this prefix (repeatable)", show_default=False),
     sheet_name: str = typer.Option("Sheet1", "--sheet-name", help="XLSX sheet name"),
     sample_headers: int = typer.Option(1000, "--sample-headers", help="Number of rows to sample for headers"),
@@ -81,6 +101,8 @@ def convert(
             list_separator=list_separator,
             explode=explode,
             excludes=exclude,
+            includes=include,
+            pinned_first_columns=first_column,
         )
 
         # Wrap rows with a generator that advances a progress bar periodically
@@ -102,6 +124,7 @@ def convert(
                 max_sample=sample_headers,
                 pre_headers=pre_headers,
                 header_order=header_order.lower(),
+                include_prefixes=include or None,
             )
         else:
             write_xlsx(
@@ -111,6 +134,7 @@ def convert(
                 max_sample=sample_headers,
                 pre_headers=pre_headers,
                 header_order=header_order.lower(),
+                include_prefixes=include or None,
             )
 
     console.print(f"[green]Done:[/] Wrote {output}")

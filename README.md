@@ -65,7 +65,9 @@ json-to-excel-converter INPUT.json OUTPUT.(csv|xlsx) \
   --sample-headers 10 \
   --header-order stable \
   --first-column id \
-  --exclude details
+  --exclude details \
+  --include summary \
+  --include details
 ```
 
 ### Options
@@ -77,6 +79,7 @@ json-to-excel-converter INPUT.json OUTPUT.(csv|xlsx) \
 - `--header-order`: column ordering `stable` (first-seen) or `alpha` (alphabetical)
 - `--first-column`: pin specific columns to the beginning (repeatable)
 - `--exclude`: remove columns by path prefix (repeatable)
+- `--include`: keep only columns whose path equals or starts with this prefix (repeatable). Ordering of groups follows the flag order; pinned columns still appear first. Within each group, `--header-order` applies.
 
 ## FAQ
 
@@ -162,6 +165,16 @@ json-to-excel-converter your-data.json output.csv --root products --first-column
 
 # Remove unwanted columns
 json-to-excel-converter your-data.json output.csv --exclude personal_info --exclude internal
+
+### 7. Include Only Certain Columns (and Order by Flag Order)
+```bash
+json-to-excel-converter sample.json selected.csv \
+  --root orders \
+  --first-column order_id \
+  --include payment \
+  --include customer
+```
+What you get: only `order_id`, then all `payment.*` columns, then all `customer.*` columns. Within each group, ordering follows `--header-order`.
 ```
 
 ### Row Count Summary

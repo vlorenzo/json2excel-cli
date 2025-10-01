@@ -7,9 +7,11 @@
    - If `--explode path` is used, create one row per element at `path` (cartesian product across multiple paths).
    - Otherwise, join scalar lists with `--list-sep` when `--list-policy join` (default), or JSON-encode them when `--list-policy json`.
 4. Apply exclusion: drop keys whose dotted name equals or starts with any `--exclude` prefix.
+5. Optionally apply inclusion: if `--include` is provided, retain only keys matching any prefix (plus any pinned `--first-column`).
 5. Build headers from a sample window (`--sample-headers`, default 1000):
    - Pin columns from `--first-column` in the given order.
    - Order remaining columns via `--header-order stable|alpha`.
+   - If `--include` is provided, group remaining headers by the order of include prefixes, preserving group-internal order per `--header-order`.
 6. Write rows to CSV or XLSX with type normalization (e.g., safe conversion of Decimal).
 
 ### Deterministic header behavior

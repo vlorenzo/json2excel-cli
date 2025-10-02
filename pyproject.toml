@@ -1,6 +1,6 @@
 [project]
 name = "json-to-excel-converter"
-version = "0.1.0"
+version = "0.1.1"
 description = "Convert large JSON to CSV/XLSX with root selection, flattening, array explode, exclusion, and header control."
 readme = "README.md"
 license = { text = "MIT" }

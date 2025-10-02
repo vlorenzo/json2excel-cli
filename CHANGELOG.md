@@ -32,3 +32,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Developer-Friendly**: Well-documented codebase with comprehensive test coverage
 
 [0.1.0]: https://github.com/vlorenzo/json2excel-cli/releases/tag/v0.1.0
+
+## [0.1.1] - 2025-10-01
+
+### Added
+- `--include` option to include only specified column prefixes (dotted paths) and order groups by the sequence of flags. Works for both CSV and XLSX. Pinned columns via `--first-column` are always retained and placed first.
+
+### Changed
+- Header collection now accepts include prefix ordering to produce predictable column group ordering while still honoring `--header-order` within each group.
+
+### Docs & Tests
+- Updated `README.md`, `docs/guide.md`, `docs/tech.md`, and `examples/commands.md` with usage and examples for `--include`.
+- Added CLI tests verifying include behavior, ordering, and interaction with `--exclude` and `--first-column`.
+
+[0.1.1]: https://github.com/vlorenzo/json2excel-cli/releases/tag/v0.1.1

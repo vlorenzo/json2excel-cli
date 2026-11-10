@@ -89,6 +89,10 @@ def convert(
     """Convert a large JSON file into a flat table (CSV or XLSX)."""
     if output.suffix.lower() not in {".csv", ".xlsx"}:
         raise typer.BadParameter("Output must end with .csv or .xlsx")
+    if list_policy.lower() not in {ListPolicy.JOIN, ListPolicy.JSON}:
+        raise typer.BadParameter("--list-policy must be 'join' or 'json'")
+    if header_order.lower() not in {"stable", "alpha"}:
+        raise typer.BadParameter("--header-order must be 'stable' or 'alpha'")
 
     with Progress(transient=True) as progress:
         task = progress.add_task("Processing", start=False)
